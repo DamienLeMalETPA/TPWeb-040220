@@ -43,7 +43,7 @@ function preload(){
 	this.load.spritesheet('diamant','assets/Kings and Pigs/Sprites/12-Live_and_Coins/Big_Diamond_Idle (18x14).png',{frameWidth: 18, frameHeight: 14});
 	this.load.image('mun','assets/Kings and Pigs/Sprites/08-Box/Idle.png');
 	this.load.image('sol','assets/platform.png');
-	this.load.image('bomb','assets/Kings and Pigs/Sprites/09-Bomb/Bomb Off.png');
+	this.load.image('bomb','assets/Kings and Pigs/Sprites/09-Bomb/Bomb_Off.png');
 	this.load.spritesheet('perso','assets/free-pixel-art-tiny-hero-sprites/1 Pink_Monster/Pink_Monster_Idle_4.png',{frameWidth: 32, frameHeight: 32});
 	this.load.spritesheet('mechant','assets/free-pixel-art-tiny-hero-sprites/3 Dude_Monster/Dude_Monster_Walk_6.png',{frameWidth: 32, frameHeight: 32});
 	this.load.image('pv_red','assets/health-red.png');
