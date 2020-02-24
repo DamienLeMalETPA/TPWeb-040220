@@ -25,6 +25,7 @@ var press = 0;
 var pv;
 var maxPv;
 var munition = 0;
+var badir = 0;
 
 function init(){
  	var platforms;
@@ -44,6 +45,7 @@ function preload(){
 	this.load.image('sol','assets/platform.png');
 	this.load.image('bomb','assets/Kings and Pigs/Sprites/09-Bomb/Bomb Off.png');
 	this.load.spritesheet('perso','assets/free-pixel-art-tiny-hero-sprites/1 Pink_Monster/Pink_Monster_Idle_4.png',{frameWidth: 32, frameHeight: 32});
+	this.load.spritesheet('mechant','assets/free-pixel-art-tiny-hero-sprites/3 Dude_Monster/Dude_Monster_Walk_6.png',{frameWidth: 32, frameHeight: 32});
 	this.load.image('pv_red','assets/health-red.png');
 	this.load.image('pv_green','assets/health-green.png');
 }
@@ -67,8 +69,20 @@ function create(){
 	player.pv = 100;
 	player.maxPv = 100;
 
+	baddy = this.physics.add.sprite(100,450,'mechant');
+	baddy.setCollideWorldBounds(true);
+	this.physics.add.collider(baddy,platforms);
+	this.physics.add.collider(player,baddy,getHit,null,this);
+
 	cursors = this.input.keyboard.createCursorKeys(); 
 	
+	this.anims.create({
+		key:'right',
+		frames: this.anims.generateFrameNumbers('mechant', {start: 0, end: 6}),
+		frameRate: 10,
+		repeat: -1
+	});
+
 	this.anims.create({
 		key:'left',
 		frames: this.anims.generateFrameNumbers('perso', {start: 0, end: 3}),
@@ -91,8 +105,7 @@ function create(){
 	amo = this.physics.add.group();
 	this.physics.add.collider(amo,platforms);
 	this.physics.add.overlap(player,amo,collectAmo,null,this);
-	this.physics.add.overlap(bomb,amo,bombAmo,null,this);
-
+	
 	pvGreen = this.physics.add.staticGroup();
 	pvGreen.create(680,80,'pv_green');
 
@@ -108,9 +121,25 @@ function create(){
 	this.physics.add.collider(bombs,platforms);
 	this.physics.add.collider(bombs,bombs);
 	this.physics.add.overlap(player,bombs, hitBomb, null, this);
+	this.physics.add.overlap(bombs,amo,bombAmo,null,this);
 }
 
 function update(){
+	if (badir == 0){
+		baddy.setVelocityX(-300);
+		baddy.anims.play('right', true);
+		baddy.setFlipX(true);
+	}else{
+		baddy.setVelocityX(300);
+		baddy.anims.play('right', true);
+		baddy.setFlipX(false);
+	}
+	if (baddy.x <= 20){
+		badir = 1;
+	}
+	if (baddy.x >= 780){
+		badir = 0;
+	}
 	if (cursors.down.isDown && dash == 1){
 		dash = 0;
 		if (cursors.left.isDown){
@@ -203,4 +232,13 @@ function collectAmo(player, amo){
 }
 function bombAmo(bomb, amo){
 	amo.disableBody(true,true);
+}
+function getHit(){
+	player.y -= 40;
+	player.setVelocityY(-260);
+	score -= 10;
+	scoreText.setText('score: '+score);
+	player.pv = player.pv - 10;
+	ptText.setText('Vie : '+player.pv);
+	pvRed.create(560 + (100 - player.pv) * 2,70,'pv_red').setScale(0.1,1).setOrigin(0,0);
 }
