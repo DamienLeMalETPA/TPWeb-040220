@@ -20,6 +20,7 @@ scene: {
 var game = new Phaser.Game(config);
 var score = 0;
 var saut = 2;
+var dash = 1;
 var press = 0;
 var pv;
 var maxPv;
@@ -32,7 +33,6 @@ function init(){
 	var scoreText;
 	var ptText;
 	var bomb;
-	
 }
 
 function preload(){
@@ -110,6 +110,14 @@ function create(){
 }
 
 function update(){
+	if (cursors.down.isDown && dash == 1){
+		dash = 0;
+		if (cursors.left.isDown){
+			player.x -= 100;
+		}else{
+			player.x += 100;
+		}
+	}
 	if(cursors.left.isDown){
 		player.anims.play('left', true);
 		player.setVelocityX(-300);
@@ -139,6 +147,9 @@ function update(){
 	 if (cursors.up.isUp && player.body.touching.down) {
 		saut = 2;
 	}
+	if (player.body.touching.down && cursors.down.isUp) {
+		dash = 1;
+	}
 	if (player.pv <= 0){
 		this.physics.pause();
 		player.setTint(0xff0000);
@@ -150,7 +161,7 @@ function update(){
 function hitBomb(player, bomb){
 	bomb.disableBody(true,true);
 	createBomb();
-	score -= 100;
+	score -= 10;
 	scoreText.setText('score: '+score);
 	player.pv = player.pv - 10;
 	ptText.setText('Vie : '+player.pv);
