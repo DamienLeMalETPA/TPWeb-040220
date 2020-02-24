@@ -6,7 +6,7 @@ physics: {
         default: 'arcade',
         arcade: {
             gravity: { y: 300 },
-            debug: true
+            debug: false
         }
     },
 scene: {
@@ -26,6 +26,7 @@ var pv;
 var maxPv;
 var munition = 0;
 var badir = 0;
+var lastDir = 0;
 
 function init(){
  	var platforms;
@@ -48,6 +49,7 @@ function preload(){
 	this.load.spritesheet('mechant','assets/free-pixel-art-tiny-hero-sprites/3 Dude_Monster/Dude_Monster_Walk_6.png',{frameWidth: 32, frameHeight: 32});
 	this.load.image('pv_red','assets/health-red.png');
 	this.load.image('pv_green','assets/health-green.png');
+	this.load.image('balle','assets/bullet-sprite.png');
 }
 
 function create(){
@@ -105,7 +107,7 @@ function create(){
 	amo = this.physics.add.group();
 	this.physics.add.collider(amo,platforms);
 	this.physics.add.overlap(player,amo,collectAmo,null,this);
-	
+
 	pvGreen = this.physics.add.staticGroup();
 	pvGreen.create(680,80,'pv_green');
 
@@ -122,6 +124,12 @@ function create(){
 	this.physics.add.collider(bombs,bombs);
 	this.physics.add.overlap(player,bombs, hitBomb, null, this);
 	this.physics.add.overlap(bombs,amo,bombAmo,null,this);
+
+	bullet = this.physics.add.group();
+	this.physics.add.collider(bullet,platforms,contact,null,this);
+	this.physics.add.overlap(bombs,bullet,kill,null,this);
+
+	this.input.keyboard.on('keydown-SPACE', tir);
 }
 
 function update(){
@@ -149,10 +157,12 @@ function update(){
 		}
 	}
 	if(cursors.left.isDown){
+		lastDir = 0;
 		player.anims.play('left', true);
 		player.setVelocityX(-300);
 		player.setFlipX(true);
 	}else if(cursors.right.isDown){
+		lastDir = 1;
 		player.setVelocityX(300);
 		player.anims.play('left', true);
 		player.setFlipX(false);
@@ -241,4 +251,25 @@ function getHit(){
 	player.pv = player.pv - 10;
 	ptText.setText('Vie : '+player.pv);
 	pvRed.create(560 + (100 - player.pv) * 2,70,'pv_red').setScale(0.1,1).setOrigin(0,0);
+}
+function tir(){
+	if (munition > 0){
+		balle = bullet.create(player.x,player.y, 'balle').setScale(0.1);
+		balle.setGravityY(-300);
+		if (lastDir == 0){
+			balle.setVelocityX(-1500);
+		}else{
+			balle.setVelocityX(1500);
+			balle.setFlipX(true);
+		}
+		munition -= 1;
+		munText.setText('Munitions: '+munition);
+	}
+}
+function contact(bullet, platform){
+	bullet.disableBody(true,true);
+}
+function kill(bomb, bullet){
+	bomb.disableBody(true,true);
+	bullet.disableBody(true,true);
 }
