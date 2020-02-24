@@ -24,6 +24,7 @@ var dash = 1;
 var press = 0;
 var pv;
 var maxPv;
+var munition = 0;
 
 function init(){
  	var platforms;
@@ -39,14 +40,13 @@ function preload(){
 	this.load.image('background','assets/Taiga-Asset-Pack_vnitti/PNG/Background.png');	
 	this.load.image('fond','assets/Taiga-Asset-Pack_vnitti/PNG/Middleground.png');
 	this.load.spritesheet('diamant','assets/Kings and Pigs/Sprites/12-Live_and_Coins/Big_Diamond_Idle (18x14).png',{frameWidth: 18, frameHeight: 14});
+	this.load.image('mun','assets/Kings and Pigs/Sprites/08-Box/Idle.png');
 	this.load.image('sol','assets/platform.png');
 	this.load.image('bomb','assets/Kings and Pigs/Sprites/09-Bomb/Bomb Off.png');
 	this.load.spritesheet('perso','assets/free-pixel-art-tiny-hero-sprites/1 Pink_Monster/Pink_Monster_Idle_4.png',{frameWidth: 32, frameHeight: 32});
 	this.load.image('pv_red','assets/health-red.png');
 	this.load.image('pv_green','assets/health-green.png');
 }
-
-
 
 function create(){
 	this.add.image(400,300,'background').setScale(3);
@@ -58,7 +58,6 @@ function create(){
 	platforms.create(684,550,'sol').setOrigin(0,0).setScale(2).refreshBody();
 	platforms.create(600,400,'sol');
 	platforms.create(50,250,'sol');
-	
 	
 	player = this.physics.add.sprite(100,450,'perso');
 	player.setCollideWorldBounds(true);
@@ -89,24 +88,26 @@ function create(){
 		setXY: {x:12,y:0,stepX:70}
 	});
 
-	
+	amo = this.physics.add.group();
+	this.physics.add.collider(amo,platforms);
+	this.physics.add.overlap(player,amo,collectAmo,null,this);
+	this.physics.add.overlap(bomb,amo,bombAmo,null,this);
 
 	pvGreen = this.physics.add.staticGroup();
 	pvGreen.create(680,80,'pv_green');
 
 	pvRed = this.physics.add.staticGroup();
-	//pvRed.create(680,80,'pv_red');
-	//pvRed.create(580,70,'pv_red').setScale(0.1,1).setOrigin(0,0);
 
 	this.physics.add.collider(stars,platforms);
 	this.physics.add.overlap(player,stars,collectStar,null,this);
 
 	scoreText = this.add.text(16,16, 'score: 0', {fontSize: '32px', fill:'#000'});
+	munText = this.add.text(16,60, 'Munitions: 0', {fontSize: '32px', fill:'#000'});
 	ptText = this.add.text(600,16, 'Vie : 100', {fontSize: '32px', fill:'#000'});
 	bombs = this.physics.add.group();
 	this.physics.add.collider(bombs,platforms);
 	this.physics.add.collider(bombs,bombs);
-	this.physics.add.collider(player,bombs, hitBomb, null, this);
+	this.physics.add.overlap(player,bombs, hitBomb, null, this);
 }
 
 function update(){
@@ -167,7 +168,6 @@ function hitBomb(player, bomb){
 	ptText.setText('Vie : '+player.pv);
 	pvRed.create(560 + (100 - player.pv) * 2,70,'pv_red').setScale(0.1,1).setOrigin(0,0);
 }
-
 function collectStar(player, star){
 	star.disableBody(true,true);
 	score += 10;
@@ -176,8 +176,8 @@ function collectStar(player, star){
 		stars.children.iterate(function(child){
 			child.enableBody(true,child.x,0, true, true);
 		});
-		
 		createBomb();
+		createAmo();
 	}
 }
 function createBomb(){
@@ -190,4 +190,17 @@ function createBomb(){
 		bomb.setBounce(1);
 		bomb.setCollideWorldBounds(true);
 		bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+}
+function createAmo(){
+	var x = Phaser.Math.Between(0,800);
+	amos = amo.create(x, 5, 'mun');
+	amos.setGravityY(250);
+}
+function collectAmo(player, amo){
+	amo.disableBody(true,true);
+	munition += 2;
+	munText.setText('Munitions: '+munition);
+}
+function bombAmo(bomb, amo){
+	amo.disableBody(true,true);
 }
